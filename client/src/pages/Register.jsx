@@ -22,6 +22,8 @@ export default function Register() {
     try {
       const payload = { ...form };
       if (form.semester) payload.semester = Number(form.semester);
+      else delete payload.semester;
+      if (!form.rollNo) delete payload.rollNo;
       const { data } = await api.post('/auth/register', payload);
       setUser(data.user);
       navigate(data.user.role === 'faculty' ? '/faculty/dashboard' : '/student/dashboard');

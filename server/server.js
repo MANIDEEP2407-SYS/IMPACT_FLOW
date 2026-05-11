@@ -25,7 +25,10 @@ app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true,
 }));
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'production' ? 200 : 10000,
+}));
 app.use(express.json());
 app.use(cookieParser());
 
