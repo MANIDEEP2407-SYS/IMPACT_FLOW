@@ -480,14 +480,13 @@ Built with purpose by **Team ImpactFlow**
 
 | Name | Role |
 |---|---|
-| Manideep | Full-Stack Lead |
-| Rishit Kumar | Backend + API Design |
-| Samyuktha | Frontend + UI/UX |
+| kankatala ganesh giridhar | idea pitch, brain storming, validations and code designing  |
+| Manideep | impelmentation and code building  |
 
 ---
 
 <div align="center">
 
-Made with dedication · **Team ImpactFlow** · 2025
+Made with dedication · **Team ImpactFlow** · 2026
 
 </div>
