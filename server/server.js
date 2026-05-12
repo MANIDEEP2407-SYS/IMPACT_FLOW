@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import dns from 'dns';
+dns.setServers(['8.8.8.8', '8.8.4.4']); // Use Google DNS — local DNS doesn't resolve MongoDB SRV records
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
