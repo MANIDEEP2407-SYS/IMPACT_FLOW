@@ -6,6 +6,9 @@ import EmptyState from '../../components/EmptyState.jsx';
 import FacultySidebar from '../../components/FacultySidebar.jsx';
 import Navbar from '../../components/Navbar.jsx';
 import useAuthStore from '../../store/authStore.js';
+import SEO from '../../components/SEO.jsx';
+import { rankByContribution } from '../../utils/dsa.js';
+
 
 function IconBook() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>;
@@ -45,10 +48,20 @@ export default function FacultyDashboard() {
     api.get('/courses/my').then(r => { setCourses(r.data.courses); setLoading(false); });
   }, []);
 
-  const totalStudents = courses.reduce((a, c) => a + (c.students?.length || 0), 0);
+  /* DSA: collect all students across courses, rank by enrolledCourses count as proxy score */
+  const allStudentsRaw = courses.flatMap(c =>
+    (c.students || []).map(s => ({ name: s.name || s, contributionScore: 0, courseCount: 1 }))
+  );
+  const rankedStudents = rankByContribution(allStudentsRaw).slice(0, 5);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#f8faff' }}>
+      <SEO
+        title="Faculty Dashboard"
+        description="Manage your courses, track student contributions, and review team progress on ImpactFlow — the academic project management platform."
+        keywords="faculty dashboard, course management, student contribution tracking, capstone project management, academic project platform"
+        path="/faculty/dashboard"
+      />
       <Navbar />
       <div className="flex flex-1">
         <FacultySidebar />

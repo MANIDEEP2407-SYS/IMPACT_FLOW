@@ -6,6 +6,7 @@ import StudentSidebar from '../../components/StudentSidebar.jsx';
 import Spinner from '../../components/Spinner.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import useAuthStore from '../../store/authStore.js';
+import SEO from '../../components/SEO.jsx';
 
 export default function StudentDashboard() {
   const user = useAuthStore(s => s.user);
@@ -18,6 +19,12 @@ export default function StudentDashboard() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#f8faff' }}>
+      <SEO
+        title="Student Dashboard"
+        description="Track your enrolled courses, team progress, and task contributions on ImpactFlow — the academic project platform for students."
+        keywords="student dashboard, academic project tracking, college team project, task log, milestone tracker"
+        path="/student/dashboard"
+      />
       <Navbar />
       <div className="flex flex-1">
         <StudentSidebar />

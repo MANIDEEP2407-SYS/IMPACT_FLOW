@@ -3,7 +3,9 @@
 <img src="https://img.shields.io/badge/ImpactFlow-v2.0-4f46e5?style=for-the-badge&labelColor=1e1b4b" alt="ImpactFlow"/>
 <img src="https://img.shields.io/badge/Stack-MERN-0d9488?style=for-the-badge&labelColor=134e4a" alt="MERN"/>
 <img src="https://img.shields.io/badge/Status-Live-22c55e?style=for-the-badge&labelColor=14532d" alt="Live"/>
-<img src="https://img.shields.io/badge/Team-ImpactFlow-818cf8?style=for-the-badge&labelColor=312e81" alt="Team"/>
+<img src="https://img.shields.io/badge/DSA-Implemented-f59e0b?style=for-the-badge&labelColor=78350f" alt="DSA"/>
+<img src="https://img.shields.io/badge/SEO-Optimized-818cf8?style=for-the-badge&labelColor=312e81" alt="SEO"/>
+<img src="https://img.shields.io/badge/Team-ImpactFlow-6366f1?style=for-the-badge&labelColor=1e1b4b" alt="Team"/>
 
 <br/>
 <br/>
@@ -474,14 +476,132 @@ Add a free [UptimeRobot](https://uptimerobot.com) monitor pinging Railway every 
 
 ---
 
+## Algorithms & DSA
+
+ImpactFlow implements two core algorithms, demonstrating practical DSA usage in a production system.
+
+### 1. Merge Sort — Contribution Leaderboard
+
+**Location:** `client/src/utils/dsa.js` → `mergeSort()` / `rankByContribution()`  
+**Used in:** Team Workspace (Overview tab) · Faculty Project Dashboard
+
+```
+Time  Complexity: O(n log n)
+Space Complexity: O(n)
+```
+
+Why Merge Sort over other sorts?
+- **Stable** — students with equal scores keep original order
+- **Predictable** O(n log n) worst-case unlike Quick Sort
+- Visible on the UI with a **"Sorted via Merge Sort"** badge for demo clarity
+
+The leaderboard ranks team members by contribution score (0–100) in descending order, colour-coded Green / Amber / Red.
+
+---
+
+### 2. TF-IDF + Cosine Similarity — README Plagiarism Detection
+
+**Location:** `client/src/utils/dsa.js` → `calculateCosineSimilarity()` / `buildSimilarityReport()`  
+**Used in:** Team Workspace (Similarity tab) · Faculty Project Similarity Report
+
+```
+Time  Complexity: O(n × |V|)   where |V| = vocabulary size
+Space Complexity: O(|V|)
+```
+
+**Pipeline:**
+```
+1. Tokenise → lowercase, strip punctuation, remove stop words
+2. TF(t, d) = count(t in d) / total_terms(d)
+3. IDF(t)   = log((N + 1) / (df(t) + 1))
+4. TF-IDF   = TF × IDF  per term per document
+5. Cosine   = dot(A, B) / (|A| × |B|)
+```
+
+| Score | Risk Level | Action |
+|---|---|---|
+| > 75% | 🔴 High Risk | Likely plagiarism |
+| 51–75% | 🟡 Medium | Flag for review |
+| ≤ 50% | 🟢 Low | Safe |
+
+Faculty can run cross-team reports. Students can paste any text for a live comparison in the Workspace Similarity tab.
+
+---
+
+## SEO Implementation
+
+ImpactFlow is fully SEO-optimised using `react-helmet-async`.
+
+### Component: `SEO.jsx`
+Reusable helmet wrapper accepting: `title`, `description`, `keywords`, `ogImage`, `path`.
+
+### Applied to Pages
+| Page | Title | Keywords |
+|---|---|---|
+| Login | `Login \| ImpactFlow` | college project management login |
+| Register | `Register \| ImpactFlow` | create faculty student account |
+| Faculty Dashboard | `Faculty Dashboard \| ImpactFlow` | course management, contribution tracking |
+| Student Dashboard | `Student Dashboard \| ImpactFlow` | academic project tracking, task log |
+| Team Workspace | `{teamName} Workspace \| ImpactFlow` | team collaboration, code versioning |
+
+### Static Files
+- `public/robots.txt` — allows public pages, blocks auth-gated routes
+- `public/sitemap.xml` — lists all crawlable URLs for Google
+
+### Tags Included
+- `<title>` + `<meta description>` + `<meta keywords>`
+- Open Graph (`og:title`, `og:description`, `og:image`, `og:url`)
+- Twitter Card (`twitter:card`, `twitter:title`, `twitter:image`)
+- `<link rel="canonical">`
+
+---
+
+## Skills & Technologies Demonstrated
+
+### Frontend
+| Skill | Detail |
+|---|---|
+| React 19 + Vite | Hooks, component architecture, file-based routing |
+| Tailwind CSS | Custom design system (Indigo + Teal palette) |
+| Zustand | Auth state, notification state |
+| react-helmet-async | Dynamic SEO meta tags per page |
+
+### Backend
+| Skill | Detail |
+|---|---|
+| Node.js + Express (ESM) | REST API, middleware chain |
+| MongoDB + Mongoose | Schema design, populate, aggregations |
+| JWT + bcryptjs | HTTPOnly cookie auth, 10-round hashing |
+| Zod | Server-side input validation on every route |
+| Cloudinary + multer | File upload with buffer streaming |
+| node-cron | Daily 8 AM milestone reminder cron job |
+
+### Algorithms & DSA
+| Algorithm | Use Case | Complexity |
+|---|---|---|
+| **Merge Sort** | Student contribution leaderboard — stable O(n log n) ranking | O(n log n) / O(n) |
+| **TF-IDF + Cosine Similarity** | README plagiarism detection across teams | O(n × \|V\|) |
+| **Jaccard Similarity** (server-side) | Cross-team similarity backup for faculty report | O(\|A ∪ B\|) |
+| **Rule-based scoring** | AI transparency flag on submissions | O(n) string pass |
+
+### SEO & Best Practices
+| Practice | Implementation |
+|---|---|
+| Technical SEO | Meta tags, Open Graph, Twitter Cards, canonical URLs |
+| robots.txt | Blocks auth-gated routes, allows public pages |
+| sitemap.xml | Lists all crawlable pages for search engines |
+| Secure auth | HTTPOnly cookies, CORS, Helmet, rate limiting |
+
+---
+
 ## Team
 
 Built with purpose by **Team ImpactFlow**
 
 | Name | Role |
 |---|---|
-| kankatala ganesh giridhar | idea pitch, brain storming, validations and code designing  |
-| Manideep | impelmentation and code building  |
+| **Kankatala Ganesh Giridhar** | Product Ideation, System Architecture & Validation |
+| **Manideep** | Lead Full-Stack Developer |
 
 ---
 

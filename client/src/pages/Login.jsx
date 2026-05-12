@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api.js';
 import useAuthStore from '../store/authStore.js';
 import Spinner from '../components/Spinner.jsx';
+import SEO from '../components/SEO.jsx';
 
 /* ── Inline SVG icon set (no emojis) ── */
 function IconShield() {
@@ -113,6 +114,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <SEO
+        title="Login"
+        description="Sign in to ImpactFlow — the academic project management platform for faculty and students. Track contributions, log tasks, and submit milestones."
+        keywords="ImpactFlow login, college project management login, faculty student login, academic project platform"
+        path="/login"
+      />
 
       {/* ════════════════════════════════════
           LEFT  — Brand Panel

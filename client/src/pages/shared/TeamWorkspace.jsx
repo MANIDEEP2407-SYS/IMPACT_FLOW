@@ -4,6 +4,8 @@ import api from '../../utils/api.js';
 import Navbar from '../../components/Navbar.jsx';
 import Spinner from '../../components/Spinner.jsx';
 import useAuthStore from '../../store/authStore.js';
+import SEO from '../../components/SEO.jsx';
+import { rankByContribution, buildSimilarityReport, calculateCosineSimilarity } from '../../utils/dsa.js';
 
 /* ── tiny toast ── */
 function Toast({ msg, type, onClose }) {
@@ -250,13 +252,48 @@ function TaskLogsTab({ teamId }) {
   );
 }
 
-/* ═══════════════════════════ OVERVIEW TAB ══ */
+/* ═══════════════════════════════════ OVERVIEW TAB ══ */
 function OverviewTab({ team }) {
   if (!team) return null;
-  const statStyle = (bg, border, color) => ({ padding:'14px 16px', borderRadius:14, background:bg, border:`1.5px solid ${border}`, textAlign:'center' });
+
+  /* DSA: Merge Sort — rank members by contribution score */
+  const membersWithScores = (team.members || []).map(m => ({
+    ...m,
+    name: m.user?.name || 'Member',
+    rollNo: m.user?.rollNo || m.user?.role || '',
+    contributionScore: team.contributionScores?.find(s => String(s.user) === String(m.user?._id))?.score ?? 0,
+  }));
+  const rankedMembers = rankByContribution(membersWithScores);
+
+  const statStyle = (bg, border) => ({ padding:'14px 16px', borderRadius:14, background:bg, border:`1.5px solid ${border}`, textAlign:'center' });
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
-      {/* Members */}
+      {/* DSA: Contribution Leaderboard (Merge Sort) */}
+      <div style={{ background:'#fff', border:'1.5px solid #e0e7ff', borderRadius:16, overflow:'hidden' }}>
+        <div style={{ padding:'12px 16px', background:'linear-gradient(135deg,#eef2ff,#f0fdfa)', borderBottom:'1px solid #e0e7ff', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span style={{ fontWeight:800, fontSize:13, color:'#1e1b4b' }}>Contribution Leaderboard</span>
+          <span style={{ fontSize:10, padding:'2px 8px', borderRadius:999, background:'#eef2ff', color:'#4338ca', border:'1px solid #c7d2fe', fontWeight:700 }}>Sorted via Merge Sort</span>
+        </div>
+        <div style={{ padding:16, display:'flex', flexDirection:'column', gap:8 }}>
+          {rankedMembers.map((m, i) => (
+            <div key={m.user?._id || i} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderRadius:12, background: i===0 ? 'linear-gradient(135deg,#eef2ff,#f0fdfa)' : '#f8faff', border:`1.5px solid ${i===0?'#c7d2fe':'#f1f5ff'}` }}>
+              <div style={{ width:28, height:28, borderRadius:'50%', background: i===0?'linear-gradient(135deg,#f59e0b,#d97706)':i===1?'linear-gradient(135deg,#6b7280,#9ca3af)':i===2?'linear-gradient(135deg,#b45309,#d97706)':'linear-gradient(135deg,#4f46e5,#0d9488)', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:900, fontSize:12, flexShrink:0 }}>
+                {i < 3 ? ['🥇','🥈','🥉'][i] : m.rank}
+              </div>
+              <div style={{ flex:1 }}>
+                <p style={{ fontWeight:700, fontSize:13, color:'#1e1b4b', lineHeight:1.2 }}>{m.name}</p>
+                <p style={{ fontSize:11, color:'#9ca3af' }}>{m.rollNo}</p>
+              </div>
+              <div style={{ textAlign:'right' }}>
+                <p style={{ fontWeight:900, fontSize:16, color: m.contributionScore>=70?'#15803d':m.contributionScore>=40?'#b45309':'#dc2626' }}>{m.contributionScore}</p>
+                <p style={{ fontSize:10, color:'#9ca3af', fontWeight:600 }}>score</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Members grid */}
       <div style={{ background:'#fff', border:'1.5px solid #e0e7ff', borderRadius:16, overflow:'hidden' }}>
         <div style={{ padding:'12px 16px', background:'linear-gradient(135deg,#eef2ff,#f0fdfa)', borderBottom:'1px solid #e0e7ff', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span style={{ fontWeight:800, fontSize:13, color:'#1e1b4b' }}>Team Members</span>
@@ -279,13 +316,14 @@ function OverviewTab({ team }) {
           ))}
         </div>
       </div>
-      {/* Info */}
+
+      {/* Info cards */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-        <div style={statStyle('linear-gradient(135deg,#eef2ff,#e0e7ff)','#c7d2fe','#4338ca')}>
+        <div style={statStyle('linear-gradient(135deg,#eef2ff,#e0e7ff)','#c7d2fe')}>
           <p style={{ fontSize:11, fontWeight:700, color:'#818cf8', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:4 }}>Project</p>
           <p style={{ fontWeight:800, fontSize:14, color:'#1e1b4b' }}>{team.project?.title}</p>
         </div>
-        <div style={statStyle('linear-gradient(135deg,#f0fdfa,#ccfbf1)','#99f6e4','#0f766e')}>
+        <div style={statStyle('linear-gradient(135deg,#f0fdfa,#ccfbf1)','#99f6e4')}>
           <p style={{ fontSize:11, fontWeight:700, color:'#14b8a6', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:4 }}>Course</p>
           <p style={{ fontWeight:800, fontSize:14, color:'#1e1b4b' }}>{team.course?.name}</p>
           {team.course?.section && <p style={{ fontSize:11, color:'#0f766e', marginTop:2 }}>Section {team.course.section}</p>}
@@ -295,8 +333,83 @@ function OverviewTab({ team }) {
   );
 }
 
+/* ═══════════════════════════ SIMILARITY TAB ══ */
+function SimilarityTab({ teamId }) {
+  const [results, setResults]   = useState([]);
+  const [readme, setReadme]     = useState('');
+  const [loading, setLoading]   = useState(true);
+  const [compare, setCompare]   = useState('');
+  const [liveScore, setLiveScore] = useState(null);
+
+  useEffect(() => {
+    Promise.all([
+      api.get(`/teams/${teamId}/readme`).catch(() => ({ data: { latest: null } })),
+    ]).then(([r]) => {
+      setReadme(r.data.latest?.content || '');
+      setLoading(false);
+    });
+  }, [teamId]);
+
+  function runLive() {
+    if (!readme || !compare) return;
+    /* DSA: TF-IDF Cosine Similarity */
+    setLiveScore(calculateCosineSimilarity(readme, compare));
+  }
+
+  if (loading) return <div className="flex justify-center py-16"><Spinner size="lg"/></div>;
+
+  const riskColor = s => s > 75 ? '#dc2626' : s > 50 ? '#d97706' : '#15803d';
+  const riskBg    = s => s > 75 ? '#fef2f2' : s > 50 ? '#fffbeb' : '#f0fdf4';
+  const riskBorder= s => s > 75 ? '#fecaca' : s > 50 ? '#fde68a' : '#bbf7d0';
+  const riskLabel = s => s > 75 ? 'High Risk' : s > 50 ? 'Medium' : 'Low';
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+      {/* Live checker */}
+      <div style={{ background:'#fff', border:'1.5px solid #e0e7ff', borderRadius:16, overflow:'hidden' }}>
+        <div style={{ padding:'12px 16px', background:'linear-gradient(135deg,#eef2ff,#f0fdfa)', borderBottom:'1px solid #e0e7ff', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span style={{ fontWeight:800, fontSize:13, color:'#1e1b4b' }}>Live Similarity Checker</span>
+          <span style={{ fontSize:10, padding:'2px 8px', borderRadius:999, background:'#eef2ff', color:'#4338ca', border:'1px solid #c7d2fe', fontWeight:700 }}>TF-IDF · Cosine Similarity</span>
+        </div>
+        <div style={{ padding:16, display:'flex', flexDirection:'column', gap:12 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+            <div>
+              <p style={{ fontSize:12, fontWeight:700, color:'#374151', marginBottom:6 }}>Your README</p>
+              <textarea value={readme} readOnly style={{ width:'100%', height:120, padding:10, borderRadius:10, border:'1.5px solid #e0e7ff', fontSize:12, fontFamily:'JetBrains Mono, monospace', resize:'vertical', background:'#f8faff', color:'#374151', outline:'none' }}/>
+            </div>
+            <div>
+              <p style={{ fontSize:12, fontWeight:700, color:'#374151', marginBottom:6 }}>Paste text to compare</p>
+              <textarea value={compare} onChange={e => setCompare(e.target.value)} placeholder="Paste another team's README or any text here…" style={{ width:'100%', height:120, padding:10, borderRadius:10, border:'1.5px solid #e0e7ff', fontSize:12, fontFamily:'JetBrains Mono, monospace', resize:'vertical', outline:'none', color:'#374151' }}/>
+            </div>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <button onClick={runLive} className="btn-primary" style={{ height:38, fontSize:13, minWidth:160 }}>
+              Analyse Similarity
+            </button>
+            {liveScore !== null && (
+              <div style={{ padding:'8px 16px', borderRadius:10, background:riskBg(liveScore), border:`1.5px solid ${riskBorder(liveScore)}`, display:'flex', alignItems:'center', gap:10 }}>
+                <span style={{ fontSize:22, fontWeight:900, color:riskColor(liveScore) }}>{liveScore}%</span>
+                <div>
+                  <p style={{ fontSize:12, fontWeight:800, color:riskColor(liveScore) }}>{riskLabel(liveScore)}</p>
+                  <p style={{ fontSize:10, color:'#9ca3af' }}>similarity score</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div style={{ padding:'10px 14px', borderRadius:10, background:'#f8faff', border:'1px solid #e0e7ff' }}>
+            <p style={{ fontSize:11, color:'#6b7280', lineHeight:1.6 }}>
+              <strong style={{ color:'#4338ca' }}>Algorithm:</strong> TF-IDF (Term Frequency–Inverse Document Frequency) + Cosine Similarity.
+              Stop words removed. Score &gt; 50% = Medium Risk · &gt; 75% = High Risk (possible plagiarism).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════ MAIN PAGE ══ */
-const TABS = ['Overview','README','Code Files','Task Logs'];
+const TABS = ['Overview', 'README', 'Code Files', 'Task Logs', 'Similarity'];
 
 export default function TeamWorkspace() {
   const { teamId } = useParams();
@@ -333,6 +446,12 @@ export default function TeamWorkspace() {
 
   return (
     <div style={{ minHeight:'100vh', background:'#f8faff', display:'flex', flexDirection:'column' }}>
+      <SEO
+        title={team ? `${team.name} Workspace` : 'Team Workspace'}
+        description="Collaborate with your team — shared README editor, code file versioning, task logs, contribution leaderboard, and similarity checker on ImpactFlow."
+        keywords="team workspace, group project collaboration, shared README, code version control, contribution ranking, academic project"
+        path={`/team/${teamId}/workspace`}
+      />
       <Navbar/>
       <main style={{ flex:1, maxWidth:960, margin:'0 auto', width:'100%', padding:'24px 16px' }}>
 
@@ -353,10 +472,11 @@ export default function TeamWorkspace() {
         </div>
 
         {/* Tab content */}
-        {tab === 'Overview'    && <OverviewTab team={team}/>}
-        {tab === 'README'      && <ReadmeTab teamId={teamId}/>}
-        {tab === 'Code Files'  && <CodeFilesTab teamId={teamId}/>}
-        {tab === 'Task Logs'   && <TaskLogsTab teamId={teamId}/>}
+        {tab === 'Overview'   && <OverviewTab team={team}/>}
+        {tab === 'README'     && <ReadmeTab teamId={teamId}/>}
+        {tab === 'Code Files' && <CodeFilesTab teamId={teamId}/>}
+        {tab === 'Task Logs'  && <TaskLogsTab teamId={teamId}/>}
+        {tab === 'Similarity' && <SimilarityTab teamId={teamId}/>}
       </main>
     </div>
   );

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+
+Disallow: /faculty/
+Disallow: /student/
+Disallow: /team/
+
+Sitemap: https://impactflow.vercel.app/sitemap.xml
