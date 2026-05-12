@@ -175,6 +175,15 @@ export default function StudentProjectDetail() {
                   ))}
                 </div>
                 <MilestoneStepper milestones={milestones} teamId={myTeam._id} />
+                {myTeam.status === 'active' && (
+                  <div className="mt-4 pt-3 flex justify-end" style={{ borderTop:'1px solid #f0fdfa' }}>
+                    <Link to={`/team/${myTeam._id}/workspace`}
+                      className="text-sm font-bold px-4 py-2 rounded-xl"
+                      style={{ background:'linear-gradient(135deg,#0d9488,#4f46e5)', color:'#fff' }}>
+                      Open Team Workspace →
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           ) : (

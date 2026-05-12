@@ -70,6 +70,25 @@ const METRICS = [
   { value: 'Fair',  label: 'Contribution grading' },
 ];
 
+const DEMO_USERS = [
+  {
+    role:     'Faculty',
+    name:     'Dr. Priya Sharma',
+    email:    'faculty@demo.com',
+    password: 'demo1234',
+    tag:      'Course Manager',
+    color:    { bg: 'linear-gradient(135deg, #eef2ff, #e0e7ff)', border: '#c7d2fe', dot: '#4f46e5', label: '#4338ca', sub: '#818cf8' },
+  },
+  {
+    role:     'Student',
+    name:     'Arjun Reddy',
+    email:    'student@demo.com',
+    password: 'demo1234',
+    tag:      'Sem 5 · 22CSE001',
+    color:    { bg: 'linear-gradient(135deg, #f0fdfa, #ccfbf1)', border: '#99f6e4', dot: '#0d9488', label: '#0f766e', sub: '#14b8a6' },
+  },
+];
+
 export default function Login() {
   const navigate = useNavigate();
   const setUser = useAuthStore(s => s.setUser);
@@ -365,45 +384,97 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '28px 0' }}>
-            <div style={{ flex: 1, height: 1, background: '#e0e7ff' }} />
-            <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-              Why ImpactFlow
-            </span>
-            <div style={{ flex: 1, height: 1, background: '#e0e7ff' }} />
-          </div>
-
-          {/* Feature pills — SVG + text, no emoji */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {FEATURES.map(({ Icon, title, desc }) => (
-              <div key={title} style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '12px 14px',
-                borderRadius: 12,
-                background: 'linear-gradient(135deg, #f8faff 0%, #f0fdfa 100%)',
-                border: '1.5px solid #e0e7ff',
-                transition: 'all 0.15s',
-              }}>
+          {/* ── Demo Quick Access ── */}
+          <div style={{ marginTop: 28 }}>
+            {/* Section header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <div style={{ flex: 1, height: 1, background: '#e0e7ff' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{
-                  width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                  background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)',
-                  border: '1.5px solid #c7d2fe',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#4f46e5',
-                }}>
-                  <div style={{ width: 16, height: 16 }}><Icon /></div>
-                </div>
-                <div>
-                  <p style={{ fontSize: 12.5, fontWeight: 700, color: '#1e1b4b', lineHeight: 1.2 }}>{title}</p>
-                  <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 2, lineHeight: 1.4 }}>{desc}</p>
-                </div>
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #4f46e5, #0d9488)',
+                }} />
+                <span style={{ fontSize: 10.5, color: '#9ca3af', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                  Try with demo account
+                </span>
               </div>
-            ))}
+              <div style={{ flex: 1, height: 1, background: '#e0e7ff' }} />
+            </div>
+
+            {/* Demo cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {DEMO_USERS.map(u => (
+                <button
+                  key={u.role}
+                  type="button"
+                  onClick={() => setForm({ email: u.email, password: u.password })}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                    padding: '12px 14px',
+                    borderRadius: 14,
+                    background: u.color.bg,
+                    border: `1.5px solid ${u.color.border}`,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.18s',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 6px 18px rgba(0,0,0,0.08)`; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'; }}
+                >
+                  {/* Role badge */}
+                  <span style={{
+                    fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
+                    textTransform: 'uppercase', marginBottom: 8,
+                    padding: '2px 8px', borderRadius: 999,
+                    background: 'rgba(255,255,255,0.7)',
+                    border: `1px solid ${u.color.border}`,
+                    color: u.color.label,
+                  }}>
+                    {u.role}
+                  </span>
+
+                  {/* Avatar + name */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: '50%',
+                      background: `linear-gradient(135deg, ${u.color.dot}, ${u.color.sub})`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#fff', fontSize: 11, fontWeight: 800, flexShrink: 0,
+                    }}>
+                      {u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: '#1e1b4b', lineHeight: 1.2 }}>{u.name}</p>
+                      <p style={{ fontSize: 10, color: u.color.sub, marginTop: 1, fontWeight: 600 }}>{u.tag}</p>
+                    </div>
+                  </div>
+
+                  {/* Credentials preview */}
+                  <div style={{
+                    width: '100%', borderRadius: 8, padding: '6px 10px',
+                    background: 'rgba(255,255,255,0.6)',
+                    border: `1px solid ${u.color.border}`,
+                  }}>
+                    <p style={{ fontSize: 10, color: '#6b7280', fontWeight: 500, lineHeight: 1.6 }}>
+                      <span style={{ color: u.color.label, fontWeight: 700 }}>ID  </span>{u.email}
+                    </p>
+                    <p style={{ fontSize: 10, color: '#6b7280', fontWeight: 500 }}>
+                      <span style={{ color: u.color.label, fontWeight: 700 }}>PWD </span>demo1234
+                    </p>
+                  </div>
+
+                  {/* Click hint */}
+                  <p style={{ marginTop: 7, fontSize: 10, color: u.color.sub, fontWeight: 600, width: '100%', textAlign: 'right' }}>
+                    Click to auto-fill →
+                  </p>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Footer */}
-          <p style={{ textAlign: 'center', marginTop: 28, fontSize: 11, color: '#d1d5db', fontWeight: 500 }}>
+          <p style={{ textAlign: 'center', marginTop: 24, fontSize: 11, color: '#d1d5db', fontWeight: 500 }}>
             © {new Date().getFullYear()} ImpactFlow · Team ImpactFlow
           </p>
         </div>

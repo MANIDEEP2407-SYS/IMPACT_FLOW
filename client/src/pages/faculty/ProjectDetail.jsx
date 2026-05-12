@@ -171,13 +171,16 @@ export default function ProjectDetail() {
                         })}
                       </div>
 
-                      <div className="mt-4 pt-3" style={{ borderTop: '1px solid #eef2ff' }}>
+                      <div className="mt-4 pt-3 flex items-center gap-4" style={{ borderTop: '1px solid #eef2ff' }}>
                         <Link to={`/faculty/teams/${team.id}/tasks`}
                           className="text-sm font-semibold transition-colors"
-                          style={{ color: '#4f46e5' }}
-                          onMouseEnter={e => e.currentTarget.style.color = '#4338ca'}
-                          onMouseLeave={e => e.currentTarget.style.color = '#4f46e5'}>
-                          View full task log →
+                          style={{ color: '#4f46e5' }}>
+                          View task log →
+                        </Link>
+                        <Link to={`/team/${team.id}/workspace`}
+                          className="text-sm font-semibold px-3 py-1.5 rounded-lg transition-all"
+                          style={{ background:'linear-gradient(135deg,#4f46e5,#0d9488)', color:'#fff' }}>
+                          Open Workspace
                         </Link>
                       </div>
                     </div>

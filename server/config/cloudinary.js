@@ -27,3 +27,5 @@ function makeUpload(folder) {
 
 export const uploadTasks = makeUpload('tasks');
 export const uploadSubmissions = makeUpload('submissions');
+
+export default cloudinary.v2;

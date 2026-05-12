@@ -22,6 +22,7 @@ import StudentProjectDetail from './pages/student/StudentProjectDetail.jsx';
 import LogTask from './pages/student/LogTask.jsx';
 import MyTasks from './pages/student/MyTasks.jsx';
 import SubmitMilestone from './pages/student/SubmitMilestone.jsx';
+import TeamWorkspace from './pages/shared/TeamWorkspace.jsx';
 
 function RootRedirect() {
   const user = useAuthStore(s => s.user);
@@ -58,6 +59,9 @@ export default function App() {
         <Route path="/student/tasks" element={<ProtectedRoute roles={['student']}><MyTasks /></ProtectedRoute>} />
         <Route path="/student/tasks/new" element={<ProtectedRoute roles={['student']}><LogTask /></ProtectedRoute>} />
         <Route path="/student/milestones/:milestoneId/submit" element={<ProtectedRoute roles={['student']}><SubmitMilestone /></ProtectedRoute>} />
+
+        {/* Shared workspace */}
+        <Route path="/team/:teamId/workspace" element={<ProtectedRoute roles={['student','faculty']}><TeamWorkspace /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
