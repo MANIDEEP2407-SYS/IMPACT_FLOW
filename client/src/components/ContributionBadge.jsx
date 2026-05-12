@@ -1,12 +1,19 @@
 export default function ContributionBadge({ score }) {
-  const color = score >= 70
-    ? 'bg-green-100 text-green-700'
-    : score >= 40
-    ? 'bg-amber-100 text-amber-700'
-    : 'bg-red-100 text-red-700';
+  const isHigh = score >= 70;
+  const isMid  = score >= 40;
+
+  const styles = isHigh
+    ? { bg: '#f0fdf4', border: '#bbf7d0', color: '#15803d', icon: '🔥', label: 'High' }
+    : isMid
+    ? { bg: '#fffbeb', border: '#fde68a', color: '#b45309', icon: '⚡', label: 'Mid' }
+    : { bg: '#fef2f2', border: '#fecaca', color: '#dc2626', icon: '📉', label: 'Low' };
+
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${color}`}>
-      {score}/100
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums"
+      style={{ background: styles.bg, border: `1.5px solid ${styles.border}`, color: styles.color }}
+    >
+      {styles.icon} {score}/100
     </span>
   );
 }

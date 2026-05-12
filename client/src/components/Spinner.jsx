@@ -1,6 +1,14 @@
 export default function Spinner({ size = 'md' }) {
-  const s = size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-10 w-10' : 'h-6 w-6';
+  const dim = size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-10 w-10' : 'h-6 w-6';
+  const thick = size === 'sm' ? 'border-2' : 'border-[3px]';
   return (
-    <div className={`${s} animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600`} />
+    <div
+      className={`${dim} ${thick} animate-spin rounded-full`}
+      style={{
+        borderColor: '#e0e7ff',
+        borderTopColor: '#4f46e5',
+        borderRightColor: '#0d9488',
+      }}
+    />
   );
 }
