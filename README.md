@@ -16,7 +16,7 @@
 
 A full-stack academic project management platform where faculty design courses, students ship real work, and every contribution is scored, verified, and visible.
 
-[**Live Demo**](#) · [**API Docs**](#api-reference) · [**Report Bug**](https://github.com/MANIDEEP2407-SYS/IMPACT_FLOW/issues) · [**Request Feature**](https://github.com/MANIDEEP2407-SYS/IMPACT_FLOW/issues)
+[**Live Demo**](https://impact-flow-frontend.onrender.com) · [**Backend API**](https://impact-flow.onrender.com) · [**API Reference**](#api-reference) · [**Report Bug**](https://github.com/MANIDEEP2407-SYS/IMPACT_FLOW/issues) · [**Request Feature**](https://github.com/MANIDEEP2407-SYS/IMPACT_FLOW/issues)
 
 </div>
 
@@ -299,7 +299,7 @@ npm run dev
 node seed.js
 ```
 
-This creates two demo accounts in your MongoDB:
+This creates seven demo accounts in your MongoDB:
 
 ---
 
@@ -308,13 +308,23 @@ This creates two demo accounts in your MongoDB:
 | Role | Email | Password |
 |---|---|---|
 | **Faculty** — Dr. Priya Sharma | `faculty@demo.com` | `demo1234` |
+| **Faculty** — Dr. Ananya Menon | `faculty2@demo.com` | `demo1234` |
 | **Student** — Arjun Reddy | `student@demo.com` | `demo1234` |
+| **Student** — Meera Nair | `student2@demo.com` | `demo1234` |
+| **Student** — Rahul Verma | `student3@demo.com` | `demo1234` |
+| **Student** — Sneha Iyer | `student4@demo.com` | `demo1234` |
+| **Student** — Karthik Rao | `student5@demo.com` | `demo1234` |
 
-> **Tip:** On the login page, click either demo card to auto-fill credentials, then hit **Sign in →**
+> **Tip:** On the login page, click any demo card to auto-fill credentials, then hit **Sign in →**
 
 ---
 
 ## API Reference
+
+### System
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| `GET` | `/health` | Public | System health check — DB + Cloudinary status |
 
 ### Auth
 | Method | Endpoint | Access | Description |
@@ -454,6 +464,48 @@ Add a free [UptimeRobot](https://uptimerobot.com) monitor pinging Railway every 
 # 2. Add env var: VITE_API_URL=https://your-app.railway.app/api
 # 3. Build: npm run build  |  Output: dist
 ```
+
+### Production Links
+
+- Frontend: https://impact-flow-frontend.onrender.com
+- Backend API: https://impact-flow.onrender.com
+
+### Deployment Checklist
+
+**After deploying to Render:**
+
+1. **Test Health Endpoint** — Verify DB + Cloudinary connectivity:
+   ```bash
+   curl https://impact-flow.onrender.com/health
+   ```
+   Expected response (200 OK):
+   ```json
+   {
+     "status": "ok",
+     "database": "connected",
+     "cloudinary": "configured",
+     "environment": "production",
+     "timestamp": "2026-05-17T20:45:30.000Z"
+   }
+   ```
+
+2. **Test CORS** — Ensure frontend can reach backend:
+   ```bash
+   curl -i -H "Origin: https://impact-flow-frontend.onrender.com" \
+        -H "Access-Control-Request-Method: POST" \
+        https://impact-flow.onrender.com/api/auth/me
+   ```
+   Look for `Access-Control-Allow-Origin: https://impact-flow-frontend.onrender.com`
+
+3. **Seed Demo Accounts** — From your Railway/Render backend shell:
+   ```bash
+   node seed.js
+   ```
+
+4. **Monitor Logs** — Watch for:
+   - MongoDB connection errors
+   - Cloudinary auth failures
+   - CORS rejections (log origin + error)
 
 ---
 

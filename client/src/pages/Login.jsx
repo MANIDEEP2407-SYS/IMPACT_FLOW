@@ -78,7 +78,17 @@ const DEMO_USERS = [
     email:    'faculty@demo.com',
     password: 'demo1234',
     tag:      'Course Manager',
+    details:  'Computer Science',
     color:    { bg: 'linear-gradient(135deg, #eef2ff, #e0e7ff)', border: '#c7d2fe', dot: '#4f46e5', label: '#4338ca', sub: '#818cf8' },
+  },
+  {
+    role:     'Faculty',
+    name:     'Dr. Ananya Menon',
+    email:    'faculty2@demo.com',
+    password: 'demo1234',
+    tag:      'Program Coordinator',
+    details:  'Information Technology',
+    color:    { bg: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', border: '#ddd6fe', dot: '#7c3aed', label: '#6d28d9', sub: '#8b5cf6' },
   },
   {
     role:     'Student',
@@ -86,7 +96,44 @@ const DEMO_USERS = [
     email:    'student@demo.com',
     password: 'demo1234',
     tag:      'Sem 5 · 22CSE001',
+    details:  'Computer Science',
     color:    { bg: 'linear-gradient(135deg, #f0fdfa, #ccfbf1)', border: '#99f6e4', dot: '#0d9488', label: '#0f766e', sub: '#14b8a6' },
+  },
+  {
+    role:     'Student',
+    name:     'Meera Nair',
+    email:    'student2@demo.com',
+    password: 'demo1234',
+    tag:      'Sem 4 · 22CSE002',
+    details:  'Computer Science',
+    color:    { bg: 'linear-gradient(135deg, #fff7ed, #ffedd5)', border: '#fed7aa', dot: '#f97316', label: '#ea580c', sub: '#fb923c' },
+  },
+  {
+    role:     'Student',
+    name:     'Rahul Verma',
+    email:    'student3@demo.com',
+    password: 'demo1234',
+    tag:      'Sem 6 · 22CSE003',
+    details:  'Computer Science',
+    color:    { bg: 'linear-gradient(135deg, #ecfeff, #cffafe)', border: '#a5f3fc', dot: '#0891b2', label: '#0369a1', sub: '#06b6d4' },
+  },
+  {
+    role:     'Student',
+    name:     'Sneha Iyer',
+    email:    'student4@demo.com',
+    password: 'demo1234',
+    tag:      'Sem 5 · 22CSE004',
+    details:  'Computer Science',
+    color:    { bg: 'linear-gradient(135deg, #fdf2f8, #fce7f3)', border: '#f9a8d4', dot: '#db2777', label: '#be185d', sub: '#ec4899' },
+  },
+  {
+    role:     'Student',
+    name:     'Karthik Rao',
+    email:    'student5@demo.com',
+    password: 'demo1234',
+    tag:      'Sem 7 · 22CSE005',
+    details:  'Computer Science',
+    color:    { bg: 'linear-gradient(135deg, #f8fafc, #e2e8f0)', border: '#cbd5e1', dot: '#334155', label: '#0f172a', sub: '#475569' },
   },
 ];
 
@@ -409,10 +456,10 @@ export default function Login() {
             </div>
 
             {/* Demo cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, maxHeight: 360, overflowY: 'auto', paddingRight: 4 }}>
               {DEMO_USERS.map(u => (
                 <button
-                  key={u.role}
+                  key={u.email}
                   type="button"
                   onClick={() => setForm({ email: u.email, password: u.password })}
                   style={{
@@ -454,6 +501,7 @@ export default function Login() {
                     <div>
                       <p style={{ fontSize: 12, fontWeight: 700, color: '#1e1b4b', lineHeight: 1.2 }}>{u.name}</p>
                       <p style={{ fontSize: 10, color: u.color.sub, marginTop: 1, fontWeight: 600 }}>{u.tag}</p>
+                      <p style={{ fontSize: 10, color: '#6b7280', marginTop: 2, fontWeight: 500 }}>{u.details}</p>
                     </div>
                   </div>
 

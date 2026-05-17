@@ -4,24 +4,10 @@
  */
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
+import User from './models/User.js';
 
 await mongoose.connect(process.env.MONGO_URI);
 console.log('✔  DB connected:', mongoose.connection.host);
-
-/* ── Inline User schema (matches your existing model) ── */
-const userSchema = new mongoose.Schema({
-  name:       { type: String, required: true },
-  email:      { type: String, required: true, unique: true, lowercase: true },
-  password:   { type: String, required: true },
-  role:       { type: String, enum: ['student', 'faculty'], default: 'student' },
-  college:    { type: String, default: 'ImpactFlow University' },
-  department: { type: String, default: 'Computer Science' },
-  semester:   { type: Number },
-  rollNo:     { type: String },
-}, { timestamps: true });
-
-const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 const DEMO_ACCOUNTS = [
   {
@@ -33,6 +19,14 @@ const DEMO_ACCOUNTS = [
     department: 'Computer Science',
   },
   {
+    name:       'Dr. Ananya Menon',
+    email:      'faculty2@demo.com',
+    password:   'demo1234',
+    role:       'faculty',
+    college:    'ImpactFlow University',
+    department: 'Information Technology',
+  },
+  {
     name:       'Arjun Reddy',
     email:      'student@demo.com',
     password:   'demo1234',
@@ -42,21 +36,74 @@ const DEMO_ACCOUNTS = [
     semester:   5,
     rollNo:     '22CSE001',
   },
+  {
+    name:       'Meera Nair',
+    email:      'student2@demo.com',
+    password:   'demo1234',
+    role:       'student',
+    college:    'ImpactFlow University',
+    department: 'Computer Science',
+    semester:   4,
+    rollNo:     '22CSE002',
+  },
+  {
+    name:       'Rahul Verma',
+    email:      'student3@demo.com',
+    password:   'demo1234',
+    role:       'student',
+    college:    'ImpactFlow University',
+    department: 'Computer Science',
+    semester:   6,
+    rollNo:     '22CSE003',
+  },
+  {
+    name:       'Sneha Iyer',
+    email:      'student4@demo.com',
+    password:   'demo1234',
+    role:       'student',
+    college:    'ImpactFlow University',
+    department: 'Computer Science',
+    semester:   5,
+    rollNo:     '22CSE004',
+  },
+  {
+    name:       'Karthik Rao',
+    email:      'student5@demo.com',
+    password:   'demo1234',
+    role:       'student',
+    college:    'ImpactFlow University',
+    department: 'Computer Science',
+    semester:   7,
+    rollNo:     '22CSE005',
+  },
 ];
 
 for (const acc of DEMO_ACCOUNTS) {
   const existing = await User.findOne({ email: acc.email });
   if (existing) {
-    console.log(`⚠  Already exists: ${acc.email} — skipping`);
+    existing.name = acc.name;
+    existing.password = acc.password;
+    existing.role = acc.role;
+    existing.college = acc.college;
+    existing.department = acc.department;
+    existing.semester = acc.semester;
+    existing.rollNo = acc.rollNo;
+    await existing.save();
+    console.log(`✔  Updated [${acc.role}]  ${acc.email}  /  password: ${acc.password}`);
     continue;
   }
-  const hashed = await bcrypt.hash(acc.password, 10);
-  await User.create({ ...acc, password: hashed });
+
+  await User.create(acc);
   console.log(`✔  Created [${acc.role}]  ${acc.email}  /  password: ${acc.password}`);
 }
 
 console.log('\nDemo accounts ready:');
-console.log('  Faculty  → faculty@demo.com   /  demo1234');
-console.log('  Student  → student@demo.com   /  demo1234');
+console.log('  Faculty  → faculty@demo.com    /  demo1234');
+console.log('  Faculty  → faculty2@demo.com   /  demo1234');
+console.log('  Students → student@demo.com    /  demo1234');
+console.log('            student2@demo.com   /  demo1234');
+console.log('            student3@demo.com   /  demo1234');
+console.log('            student4@demo.com   /  demo1234');
+console.log('            student5@demo.com   /  demo1234');
 
 await mongoose.disconnect();

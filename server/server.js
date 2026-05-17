@@ -23,9 +23,30 @@ import { startCronJobs } from './utils/cronJobs.js';
 const app = express();
 
 app.use(helmet());
+
+/* ── Hardened CORS: support dev + production origins ── */
+const allowedOrigins = [
+  'http://localhost:5174',                          // Vite dev (default)
+  'http://localhost:3000',                          // Alternative dev port
+  'http://127.0.0.1:5174',                          // Localhost alt
+  'https://impact-flow-frontend.onrender.com',      // Render production
+];
+
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS not allowed for ${origin}`));
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -33,6 +54,32 @@ app.use(rateLimit({
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+/* ── Health check endpoint ── */
+app.get('/health', async (req, res) => {
+  try {
+    const mongoStatus = require('mongoose').connection.readyState === 1 ? 'connected' : 'disconnected';
+    const cloudinaryStatus = process.env.CLOUDINARY_CLOUD_NAME ? 'configured' : 'missing';
+    
+    const health = {
+      status: mongoStatus === 'connected' && cloudinaryStatus === 'configured' ? 'ok' : 'degraded',
+      timestamp: new Date().toISOString(),
+      database: mongoStatus,
+      cloudinary: cloudinaryStatus,
+      environment: process.env.NODE_ENV || 'development',
+      uptime: process.uptime(),
+    };
+    
+    const statusCode = health.status === 'ok' ? 200 : 503;
+    res.status(statusCode).json(health);
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      error: err.message,
+    });
+  }
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
