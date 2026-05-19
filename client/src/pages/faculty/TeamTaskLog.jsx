@@ -67,21 +67,21 @@ export default function TeamTaskLog() {
             <div
               className="hero-morphing relative rounded-2xl p-8 mb-8 overflow-hidden"
               style={{
-                background: 'linear-gradient(135deg, #ffffff 0%, #eef2ff 45%, #ecfeff 100%)',
-                boxShadow: '0 18px 40px rgba(99,102,241,0.08), 0 10px 24px rgba(20,184,166,0.06)',
-                border: '1px solid rgba(99,102,241,0.14)',
+                background: 'linear-gradient(135deg, rgba(13,28,45,0.94) 0%, rgba(18,33,49,0.94) 48%, rgba(3,55,49,0.42) 100%)',
+                boxShadow: '0 24px 50px rgba(0,0,0,0.38), 0 0 28px rgba(60,221,199,0.12)',
+                border: '1px solid rgba(255,255,255,0.08)',
               }}
             >
               <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--border-neon), transparent 70%)', animation: 'pulse-glow 4s ease-in-out infinite' }} />
+                style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.32), transparent 70%)', animation: 'pulse-glow 4s ease-in-out infinite' }} />
               <div className="absolute bottom-0 left-1/4 w-32 h-32 rounded-full"
-                style={{ background: 'radial-gradient(circle, var(--border-cyber), transparent 70%)', animation: 'pulse-glow 4s ease-in-out infinite 2s' }} />
+                style={{ background: 'radial-gradient(circle, rgba(60,221,199,0.28), transparent 70%)', animation: 'pulse-glow 4s ease-in-out infinite 2s' }} />
               <div className="relative z-10">
                 <p className="text-xs font-black uppercase tracking-[0.25em] mb-2" style={{ color: 'var(--text-muted)' }}>
                   Faculty Monitor
                 </p>
                 <h1 className="text-3xl font-black mb-2" style={{
-                  background: 'linear-gradient(135deg, var(--neon-700), var(--cyber-600))',
+                  background: 'linear-gradient(135deg, #a5b4fc, #5eead4)',
                   WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
                 }}>
                   Team Task Log
@@ -96,10 +96,10 @@ export default function TeamTaskLog() {
           {!loading && tasks.length > 0 && (
             <ScrollReveal direction="up" delay={70}>
               <div className="rounded-xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3"
-                style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', backdropFilter: 'blur(14px)' }}>
+                style={{ background: 'rgba(13,28,45,0.7)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(14px)' }}>
                 <div>
-                  <label className="label">Filter by member</label>
-                  <select className="input" value={memberFilter} onChange={e => setMemberFilter(e.target.value)}>
+                  <label className="label" style={{ color: 'var(--text-muted)' }}>Filter by member</label>
+                  <select className="input" value={memberFilter} onChange={e => setMemberFilter(e.target.value)} style={{ background: 'rgba(5,16,31,0.88)', color: 'var(--text-secondary)', border: '1px solid rgba(255,255,255,0.08)' }}>
                     <option value="all">All members</option>
                     {memberOptions.map(member => (
                       <option key={member._id} value={member._id}>{member.name}</option>
@@ -107,8 +107,8 @@ export default function TeamTaskLog() {
                   </select>
                 </div>
                 <div>
-                  <label className="label">Filter by milestone</label>
-                  <select className="input" value={milestoneFilter} onChange={e => setMilestoneFilter(e.target.value)}>
+                  <label className="label" style={{ color: 'var(--text-muted)' }}>Filter by milestone</label>
+                  <select className="input" value={milestoneFilter} onChange={e => setMilestoneFilter(e.target.value)} style={{ background: 'rgba(5,16,31,0.88)', color: 'var(--text-secondary)', border: '1px solid rgba(255,255,255,0.08)' }}>
                     <option value="all">All milestones</option>
                     {milestoneOptions.map(milestone => (
                       <option key={milestone._id} value={milestone._id}>{milestone.title}</option>
@@ -164,15 +164,15 @@ export default function TeamTaskLog() {
                           intensity={5}
                           style={{
                             ...getItemStyle(gi * 5 + i),
-                            background: 'var(--glass-bg)',
-                            border: '1px solid var(--glass-border)',
-                            backdropFilter: 'blur(var(--glass-blur))',
+                            background: 'rgba(13,28,45,0.72)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            backdropFilter: 'blur(14px)',
                           }}
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                               {/* Task title */}
-                              <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{t.title}</p>
+                              <p className="font-bold text-sm" style={{ color: '#f3f7ff' }}>{t.title}</p>
                               {t.description && (
                                 <p className="text-xs mt-1 line-clamp-2" style={{ color: 'var(--text-muted)' }}>{t.description}</p>
                               )}

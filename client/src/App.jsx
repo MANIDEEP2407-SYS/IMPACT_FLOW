@@ -11,6 +11,8 @@ import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import NotFound from './pages/NotFound.jsx';
 
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+
 import FacultyDashboard from './pages/faculty/FacultyDashboard.jsx';
 import CreateCourse from './pages/faculty/CreateCourse.jsx';
 import CourseDetail from './pages/faculty/CourseDetail.jsx';
@@ -24,6 +26,7 @@ import JoinCourse from './pages/student/JoinCourse.jsx';
 import StudentCourseDetail from './pages/student/StudentCourseDetail.jsx';
 import StudentProjectDetail from './pages/student/StudentProjectDetail.jsx';
 import StudentProjectOverview from './pages/student/StudentProjectOverview.jsx';
+import ProjectTeams from './pages/student/ProjectTeams.jsx';
 import LogTask from './pages/student/LogTask.jsx';
 import MyTasks from './pages/student/MyTasks.jsx';
 import SubmitMilestone from './pages/student/SubmitMilestone.jsx';
@@ -33,7 +36,9 @@ function RootRedirect() {
   const { user, loading } = useAuthStore();
   if (loading) return <div className="flex h-screen items-center justify-center text-gray-500">Loading…</div>;
   if (!user) return <Navigate to="/login" replace />;
-  return <Navigate to={user.role === 'faculty' ? '/faculty/dashboard' : '/student/dashboard'} replace />;
+  if (user.role === 'student') return <Navigate to="/student/dashboard" replace />;
+  if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+  return <Navigate to="/faculty/dashboard" replace />;
 }
 
 function AppRoutes() {
@@ -62,12 +67,16 @@ function AppRoutes() {
       <Route path="/student/courses/:id" element={<ProtectedRoute roles={['student']}><StudentCourseDetail /></ProtectedRoute>} />
       <Route path="/student/projects/:id" element={<ProtectedRoute roles={['student']}><StudentProjectDetail /></ProtectedRoute>} />
       <Route path="/student/projects/:id/overview" element={<ProtectedRoute roles={['student']}><StudentProjectOverview /></ProtectedRoute>} />
+      <Route path="/projects/:projectId/teams" element={<ProtectedRoute roles={['student']}><ProjectTeams /></ProtectedRoute>} />
       <Route path="/student/tasks" element={<ProtectedRoute roles={['student']}><MyTasks /></ProtectedRoute>} />
       <Route path="/student/tasks/new" element={<ProtectedRoute roles={['student']}><LogTask /></ProtectedRoute>} />
       <Route path="/student/milestones/:milestoneId/submit" element={<ProtectedRoute roles={['student']}><SubmitMilestone /></ProtectedRoute>} />
 
       {/* Shared workspace */}
       <Route path="/team/:teamId/workspace" element={<ProtectedRoute roles={['student','faculty']}><TeamWorkspace /></ProtectedRoute>} />
+
+      {/* Admin route */}
+      <Route path="/admin/dashboard" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

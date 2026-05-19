@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api.js';
 import Spinner from '../../components/Spinner.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
@@ -31,6 +31,7 @@ function IconSparkle() {
 
 export default function FacultyDashboard() {
   const user = useAuthStore(s => s.user);
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -61,15 +62,17 @@ export default function FacultyDashboard() {
 
   /* DSA: collect all students across courses, rank by enrolledCourses count as proxy score */
   const allStudentsRaw = courses.flatMap(c =>
-    (c.students || []).map(s => ({ name: s.name || s, contributionScore: 0, courseCount: 1 }))
+    (c.students || []).map(s => ({ name: s.name || 'Student', contributionScore: 0, courseCount: 1 }))
   );
-  const rankedStudents = rankByContribution(allStudentsRaw).slice(0, 5);
+  const rankedStudents = rankByContribution(allStudentsRaw)
+    .slice(0, 5)
+    .map((student, index) => ({ ...student, name: student.name || `Student ${index + 1}` }));
 
   /* Stagger animation for course cards */
   const { containerRef, getItemStyle, isVisible: staggerVisible } = useStaggerReveal(courses.length, 100);
 
   /* Typewriter for the greeting */
-  const greeting = `${user?.name?.split(' ')[0] || 'Professor'}, your courses are live.`;
+  const greeting = `${user?.name || 'Professor'}, your courses are live.`;
   const { ref: typeRef, displayed: typedGreeting } = useTypewriter(greeting, 35);
 
   return (
@@ -185,7 +188,7 @@ export default function FacultyDashboard() {
                     background: 'var(--glass-bg, var(--bg-panel))',
                     border: '1px solid var(--glass-border, var(--border-glass))',
                   }}
-                  onClick={() => window.location.href = `/faculty/courses/${c._id}`}
+                  onClick={() => navigate(`/faculty/courses/${c._id}`)}
                 >
                   {/* Top accent shimmer */}
                   <div className="h-[2px] rounded-full mb-5 progress-shine"

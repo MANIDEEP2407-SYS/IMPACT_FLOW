@@ -35,16 +35,16 @@ const FEATURES = [
 ];
 
 const METRICS = [
-  { value: '360°', label: 'Student visibility' },
-  { value: 'Real', label: 'Time dashboards' },
-  { value: 'Fair', label: 'Contribution grading' },
+  { value: '20', label: 'Seeded students' },
+  { value: '5', label: 'Teams of four' },
+  { value: '1', label: 'Live course' },
 ];
 
 const DEMO_USERS = [
-  { label: 'Faculty Node', title: 'Dr. Priya Sharma', email: 'faculty@demo.com', password: 'demo1234', kind: 'shield' },
-  { label: 'Program Hub', title: 'Dr. Ananya Menon', email: 'faculty2@demo.com', password: 'demo1234', kind: 'cpu' },
-  { label: 'Scholar', title: 'Arjun Reddy', email: 'student@demo.com', password: 'demo1234', kind: 'chart' },
-  { label: 'Auditor', title: 'Meera Nair', email: 'student2@demo.com', password: 'demo1234', kind: 'shield' },
+  { label: 'Faculty', title: 'Dr. Priya Sharma', email: 'faculty@demo.com', password: 'demo1234', kind: 'shield', note: 'Course owner' },
+  { label: 'Admin', title: 'Noor Khan', email: 'admin@demo.com', password: 'demo1234', kind: 'cpu', note: 'Panel access' },
+  { label: 'Student 1', title: 'Aarav Mehta', email: 'student01@demo.com', password: 'demo1234', kind: 'chart', note: 'Team Aurora' },
+  { label: 'Student 20', title: 'Gautam Roy', email: 'student20@demo.com', password: 'demo1234', kind: 'shield', note: 'Team Echo' },
 ];
 
 export default function Login() {
@@ -60,7 +60,12 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/login', payload);
       setUser(data.user);
-      navigate(data.user.role === 'faculty' ? '/faculty/dashboard' : '/student/dashboard');
+      const destination = data.user.role === 'student'
+        ? '/student/dashboard'
+        : data.user.role === 'admin'
+          ? '/admin/dashboard'
+          : '/faculty/dashboard';
+      navigate(destination);
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
     } finally {
@@ -84,7 +89,7 @@ export default function Login() {
       </div>
       <SEO
         title="Login"
-        description="Sign in to ImpactFlow — the academic project management platform for faculty and students."
+        description="Sign in to ImpactFlow — the academic project management platform with one seeded course, 20 students, and five teams."
         keywords="ImpactFlow login, college project management login, faculty student login, academic project platform"
         path="/login"
       />
@@ -149,7 +154,7 @@ export default function Login() {
           <div className="w-full max-w-md space-y-10 relative z-10">
             <div className="space-y-2 text-center lg:text-left">
               <h3 className="text-[24px] md:text-[32px] font-bold tracking-tight text-[#e4e1ed]">Welcome back.</h3>
-              <p className="text-[#c7c4d7]">Access your academic command center.</p>
+              <p className="text-[#c7c4d7]">Access the reset demo: one faculty, one course, 20 students, five teams.</p>
             </div>
 
             <div className="rounded-3xl p-6 md:p-8" style={{ background: 'rgba(13,28,45,0.68)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 50px rgba(0,0,0,0.35)' }}>
@@ -229,10 +234,18 @@ export default function Login() {
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(192,193,255,0.12)' }}>
                         <span className="w-4 h-4 text-[#c0c1ff]"><DemoGlyph kind={demo.kind} /></span>
                       </div>
-                      <span className="text-sm text-[#e4e1ed] font-medium">{demo.label}</span>
+                      <div className="min-w-0">
+                        <span className="block text-sm text-[#e4e1ed] font-medium">{demo.label}</span>
+                        <span className="block text-[11px] text-[#908fa0] truncate">{demo.title} · {demo.note}</span>
+                      </div>
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="mt-4 rounded-2xl px-4 py-3" style={{ background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.18)' }}>
+                <p className="text-[11px] uppercase tracking-[0.16em] font-semibold mb-1" style={{ color: '#93c5fd' }}>Demo course</p>
+                <p className="text-sm" style={{ color: '#d4e4fa' }}>IFD401A · Software Engineering Studio · use faculty@demo.com for the course owner or admin@demo.com for the admin panel.</p>
               </div>
 
               <div className="text-center pt-4">

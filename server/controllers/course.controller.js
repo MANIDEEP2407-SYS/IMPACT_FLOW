@@ -22,7 +22,9 @@ export async function createCourse(req, res, next) {
 
 export async function getMyCourses(req, res, next) {
   try {
-    const courses = await Course.find({ faculty: req.user._id }).populate('faculty', 'name email');
+    const courses = await Course.find({ faculty: req.user._id })
+      .populate('faculty', 'name email')
+      .populate('students', 'name email rollNo');
     res.json({ courses });
   } catch (err) { next(err); }
 }
@@ -42,7 +44,9 @@ export async function joinCourse(req, res, next) {
 
 export async function getEnrolledCourses(req, res, next) {
   try {
-    const courses = await Course.find({ students: req.user._id }).populate('faculty', 'name email');
+    const courses = await Course.find({ students: req.user._id })
+      .populate('faculty', 'name email')
+      .populate('students', 'name email rollNo');
     res.json({ courses });
   } catch (err) { next(err); }
 }
