@@ -3,7 +3,7 @@ import multer      from 'multer';
 import {
   createTeam, joinRequest, approveTeam, rejectTeam,
   getProjectTeams, removeMember,
-  getWorkspace, generateRandomTeams, getSimilarityReport,
+  getWorkspace, generateRandomTeams, approveAllAutoTeams, getSimilarityReport,
 } from '../controllers/team.controller.js';
 import { getReadme, saveReadme }   from '../controllers/readme.controller.js';
 import { getFiles, uploadFiles }   from '../controllers/codefile.controller.js';
@@ -34,7 +34,10 @@ router.post('/teams/:teamId/readme',            validateId, roleGuard('student')
 router.get('/teams/:teamId/files',              validateId, getFiles);
 router.post('/teams/:teamId/files',             validateId, roleGuard('student'), upload.array('files', 10), uploadFiles);
 
-/* ── random teams (faculty) ── */
+/* ── auto-form teams (faculty) ── */
+router.post('/projects/:projectId/auto-form-teams', validateId, roleGuard('faculty'), generateRandomTeams);
+router.put('/projects/:projectId/auto-form-teams/approve-all', validateId, roleGuard('faculty'), approveAllAutoTeams);
+/* Backward compatibility */
 router.post('/projects/:projectId/random-teams', validateId, roleGuard('faculty'), generateRandomTeams);
 
 /* ── similarity report (faculty) ── */

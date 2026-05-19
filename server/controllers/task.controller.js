@@ -1,7 +1,11 @@
 import { z } from 'zod';
 import TaskLog from '../models/TaskLog.js';
 import Team from '../models/Team.js';
+import Milestone from '../models/Milestone.js';
+import Project from '../models/Project.js';
+import Course from '../models/Course.js';
 import { calcContributionScore } from '../utils/contribution.js';
+import { idsEqual } from '../utils/access.js';
 
 const taskSchema = z.object({
   title: z.string().min(2),
@@ -17,7 +21,14 @@ export async function createTask(req, res, next) {
       ...req.body,
       hoursSpent: Number(req.body.hoursSpent),
     });
-    const team = await Team.findOne({ 'members.user': req.user._id, status: 'active' });
+    const milestone = await Milestone.findById(data.milestoneId);
+    if (!milestone) return res.status(404).json({ error: 'Milestone not found' });
+
+    const team = await Team.findOne({
+      'members.user': req.user._id,
+      project: milestone.project,
+      status: 'active',
+    });
     if (!team) return res.status(400).json({ error: 'You must be in an active team to log tasks' });
 
     const proofFiles = (req.files || []).map(f => ({
@@ -55,6 +66,17 @@ export async function getTeamTasks(req, res, next) {
   try {
     const team = await Team.findById(req.params.teamId);
     if (!team) return res.status(404).json({ error: 'Team not found' });
+
+    const project = await Project.findById(team.project);
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    const course = await Course.findById(project.course);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    const isMember = team.members.some(m => idsEqual(m.user, req.user._id));
+    const isFacultyOwner = req.user.role === 'faculty' && idsEqual(course.faculty, req.user._id);
+    if (!isMember && !isFacultyOwner)
+      return res.status(403).json({ error: 'Forbidden' });
+
     const tasks = await TaskLog.find({ team: req.params.teamId })
       .sort('-date')
       .populate('user', 'name rollNo')
@@ -65,6 +87,7 @@ export async function getTeamTasks(req, res, next) {
 
 async function recalcContribution(teamId) {
   const team = await Team.findById(teamId);
+  if (!team) return;
   const allTasks = await TaskLog.find({ team: teamId });
 
   const memberIds = team.members.map(m => String(m.user));

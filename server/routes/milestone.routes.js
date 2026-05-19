@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createMilestone, getMilestones, updateMilestone } from '../controllers/milestone.controller.js';
+import { createMilestone, getMilestones, getMilestoneById, updateMilestone } from '../controllers/milestone.controller.js';
 import { authMiddleware, roleGuard } from '../middleware/auth.js';
 import { validateId } from '../middleware/validateId.js';
 
@@ -9,6 +9,7 @@ router.use(authMiddleware);
 
 router.post('/projects/:projectId/milestones', validateId, roleGuard('faculty'), createMilestone);
 router.get('/projects/:projectId/milestones', validateId, getMilestones);
+router.get('/milestones/:id', validateId, getMilestoneById);
 router.put('/milestones/:id', validateId, roleGuard('faculty'), updateMilestone);
 
 export default router;

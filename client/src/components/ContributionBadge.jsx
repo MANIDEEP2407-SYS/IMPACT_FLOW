@@ -3,15 +3,15 @@ export default function ContributionBadge({ score }) {
   const isMid  = score >= 40;
 
   const styles = isHigh
-    ? { bg: '#f0fdf4', border: '#bbf7d0', color: '#15803d', icon: '🔥', label: 'High' }
+    ? { bg: 'var(--success-bg)', border: 'var(--success-border)', color: 'var(--success-text)', icon: '🔥', label: 'High' }
     : isMid
-    ? { bg: '#fffbeb', border: '#fde68a', color: '#b45309', icon: '⚡', label: 'Mid' }
-    : { bg: '#fef2f2', border: '#fecaca', color: '#dc2626', icon: '📉', label: 'Low' };
+    ? { bg: 'var(--warning-bg)', border: 'var(--warning-border)', color: 'var(--warning-text)', icon: '⚡', label: 'Mid' }
+    : { bg: 'var(--danger-bg)', border: 'var(--danger-border)', color: 'var(--danger-text)', icon: '📉', label: 'Low' };
 
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold tabular-nums"
-      style={{ background: styles.bg, border: `1.5px solid ${styles.border}`, color: styles.color }}
+      style={{ background: styles.bg, border: `1px solid ${styles.border}`, color: styles.color }}
     >
       {styles.icon} {score}/100
     </span>

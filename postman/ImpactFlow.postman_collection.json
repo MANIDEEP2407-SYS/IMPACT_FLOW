@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "ImpactFlow Deployment Checks",
+    "_postman_id": "impactflow-deploy-checks",
+    "description": "Collection to verify backend /health, CORS, login cookie, auth and frontend reachability.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 - Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Health responds (200 or 503)', function() {",
+              "  pm.expect(pm.response.code).to.be.oneOf([200, 503]);",
+              "});",
+              "if (pm.response.code === 200) {",
+              "  var json = pm.response.json();",
+              "  pm.test('Health body has database and cloudinary', function() {",
+              "    pm.expect(json).to.have.property('database');",
+              "    pm.expect(json).to.have.property('cloudinary');",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - CORS Preflight (OPTIONS)",
+      "request": {
+        "method": "OPTIONS",
+        "header": [
+          { "key": "Origin", "value": "{{frontend_origin}}" },
+          { "key": "Access-Control-Request-Method", "value": "GET" }
+        ],
+        "url": "{{base_url}}/api/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('CORS preflight returns 200 or 204', function() {",
+              "  pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+              "});",
+              "pm.test('Access-Control-Allow-Origin matches frontend origin', function() {",
+              "  var allowed = pm.response.headers.get('access-control-allow-origin') || pm.response.headers.get('Access-Control-Allow-Origin');",
+              "  pm.expect(allowed).to.eql(pm.environment.get('frontend_origin'));",
+              "});",
+              "pm.test('Access-Control-Allow-Credentials true', function() {",
+              "  var ac = pm.response.headers.get('access-control-allow-credentials') || pm.response.headers.get('Access-Control-Allow-Credentials');",
+              "  pm.expect(ac).to.be.ok;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Login (sets cookie)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Origin", "value": "{{frontend_origin}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{demo_email}}\",\n  \"password\": \"{{demo_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login returns 200', function() {",
+              "  pm.expect(pm.response.code).to.equal(200);",
+              "});",
+              "pm.test('Response contains user', function() {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('user');",
+              "  if (json.user && json.user.email) { pm.environment.set('logged_in_email', json.user.email); }",
+              "});",
+              "pm.test('Set-Cookie header present', function() {",
+              "  pm.expect(pm.response.headers.has('set-cookie')).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 - Auth Me (with cookie)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Origin", "value": "{{frontend_origin}}" }
+        ],
+        "url": "{{base_url}}/api/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Auth check returns 200', function() {",
+              "  pm.expect(pm.response.code).to.equal(200);",
+              "});",
+              "pm.test('Auth response has email', function() {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('user');",
+              "  pm.expect(json.user).to.have.property('email');",
+              "  if (pm.environment.get('demo_email')) {",
+              "    pm.expect(json.user.email).to.eql(pm.environment.get('demo_email'));",
+              "  }",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 - Frontend smoke (GET /)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{frontend_origin}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Frontend responds 200 or 301/302', function() {",
+              "  pm.expect(pm.response.code).to.be.oneOf([200, 301, 302]);",
+              "});",
+              "pm.test('Frontend HTML contains ImpactFlow', function() {",
+              "  pm.expect(pm.response.text()).to.include('ImpactFlow');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": []
+}

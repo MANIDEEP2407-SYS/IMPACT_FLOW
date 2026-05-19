@@ -15,4 +15,6 @@ const submissionSchema = new mongoose.Schema({
   submittedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
+submissionSchema.index({ team: 1, milestone: 1 }, { unique: true });
+
 export default mongoose.model('MilestoneSubmission', submissionSchema);

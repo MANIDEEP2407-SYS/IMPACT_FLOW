@@ -9,6 +9,7 @@ const projectSchema = new mongoose.Schema({
     min: { type: Number, default: 2 },
     max: { type: Number, default: 5 },
   },
+  tags: [{ type: String, trim: true }],
   rubric: [{ criteria: String, weight: Number }],
   totalMarks: Number,
   status: { type: String, enum: ['active', 'completed'], default: 'active' },

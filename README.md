@@ -299,6 +299,10 @@ npm run dev
 node seed.js
 ```
 
+> Local dev note: the Vite frontend proxies `/api` requests to `http://localhost:5000` by default.  
+> Override with `client/.env` only if needed:
+> `VITE_API_URL=http://localhost:5000/api`
+
 This creates seven demo accounts in your MongoDB:
 
 ---

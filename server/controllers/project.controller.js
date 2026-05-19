@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import Project from '../models/Project.js';
 import Course from '../models/Course.js';
+import { canAccessCourse } from '../utils/access.js';
 
 const projectSchema = z.object({
   title: z.string().min(2),
@@ -9,6 +10,7 @@ const projectSchema = z.object({
   teamSize: z.object({ min: z.number().min(1), max: z.number().min(1) }).optional(),
   rubric: z.array(z.object({ criteria: z.string(), weight: z.number() })).optional(),
   totalMarks: z.number().optional(),
+  tags: z.array(z.string().trim()).optional(),
 });
 
 export async function createProject(req, res, next) {
@@ -28,6 +30,11 @@ export async function createProject(req, res, next) {
 
 export async function getCourseProjects(req, res, next) {
   try {
+    const course = await Course.findById(req.params.courseId);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+    if (!canAccessCourse(course, req.user))
+      return res.status(403).json({ error: 'Forbidden' });
+
     const projects = await Project.find({ course: req.params.courseId });
     res.json({ projects });
   } catch (err) { next(err); }
@@ -37,6 +44,8 @@ export async function getProject(req, res, next) {
   try {
     const project = await Project.findById(req.params.id).populate('course');
     if (!project) return res.status(404).json({ error: 'Project not found' });
+    if (!canAccessCourse(project.course, req.user))
+      return res.status(403).json({ error: 'Forbidden' });
     res.json({ project });
   } catch (err) { next(err); }
 }

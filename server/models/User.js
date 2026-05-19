@@ -11,6 +11,15 @@ const userSchema = new mongoose.Schema({
   semester: { type: Number, min: 1, max: 8 },
   rollNo: String,
   profilePicture: String,
+  // Profile fields
+  bio: { type: String, default: '', trim: true },
+  skills: [{ type: String, trim: true }],
+  domains: [{ type: String, trim: true }],
+  techStack: [{ type: String, trim: true }],
+  avatar: { type: String, default: '' },
+  github: { type: String, default: '', trim: true },
+  linkedin: { type: String, default: '', trim: true },
+  timezone: { type: String, default: 'UTC' },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

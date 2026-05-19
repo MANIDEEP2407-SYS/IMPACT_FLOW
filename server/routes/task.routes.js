@@ -9,7 +9,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.post('/', roleGuard('student'), uploadTasks.array('files', 3), createTask);
-router.get('/my', getMyTasks);
+router.get('/my', roleGuard('student'), getMyTasks);
 router.get('/team/:teamId', validateId, getTeamTasks);
 
 export default router;

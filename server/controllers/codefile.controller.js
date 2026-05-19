@@ -2,8 +2,29 @@ import cloudinary from '../config/cloudinary.js';
 import CodeFile    from '../models/CodeFile.js';
 import Team        from '../models/Team.js';
 import streamifier from 'streamifier';
+import { idsEqual } from '../utils/access.js';
 
 /* ── helpers ── */
+async function assertTeamReadAccess(teamId, user) {
+  const team = await Team.findById(teamId).populate('course', 'faculty');
+  if (!team) throw { status: 404, message: 'Team not found' };
+
+  const isMember = team.members.some(m => String(m.user) === String(user._id));
+  const isFacultyOwner = user.role === 'faculty' && idsEqual(team.course?.faculty, user._id);
+
+  if (user.role === 'student' && !isMember) {
+    throw { status: 403, message: 'Only team members can access files' };
+  }
+  if (user.role === 'faculty' && !isFacultyOwner) {
+    throw { status: 403, message: 'Only the course faculty can access files' };
+  }
+  if (user.role !== 'student' && user.role !== 'faculty') {
+    throw { status: 403, message: 'Forbidden' };
+  }
+
+  return team;
+}
+
 async function assertMember(teamId, userId) {
   const team = await Team.findById(teamId);
   if (!team) throw { status: 404, message: 'Team not found' };
@@ -26,7 +47,7 @@ function uploadToCloudinary(buffer, folder, originalName) {
 export async function getFiles(req, res, next) {
   try {
     const { teamId } = req.params;
-    if (req.user.role === 'student') await assertMember(teamId, req.user._id);
+    await assertTeamReadAccess(teamId, req.user);
 
     const files = await CodeFile.find({ team: teamId })
       .sort({ originalName: 1, versionNumber: -1 })

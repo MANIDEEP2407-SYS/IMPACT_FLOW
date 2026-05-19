@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import Course from '../models/Course.js';
 import { generateUniqueJoinCode } from '../utils/joinCode.js';
+import { arrayHasId } from '../utils/access.js';
 
 const courseSchema = z.object({
   name: z.string().min(2),
@@ -31,7 +32,7 @@ export async function joinCourse(req, res, next) {
     const { joinCode } = z.object({ joinCode: z.string().length(6) }).parse(req.body);
     const course = await Course.findOne({ joinCode: joinCode.toUpperCase() });
     if (!course) return res.status(404).json({ error: 'Invalid join code' });
-    if (course.students.includes(req.user._id))
+    if (arrayHasId(course.students, req.user._id))
       return res.status(409).json({ error: 'Already enrolled' });
     course.students.push(req.user._id);
     await course.save();

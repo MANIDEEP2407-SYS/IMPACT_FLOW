@@ -2,8 +2,10 @@ import MilestoneSubmission from '../models/MilestoneSubmission.js';
 import Milestone from '../models/Milestone.js';
 import Team from '../models/Team.js';
 import Project from '../models/Project.js';
+import Course from '../models/Course.js';
 import { getAIFlagScore, getAIFlagDetails } from '../utils/aiFlag.js';
 import { notifyMany } from '../utils/notify.js';
+import { idsEqual } from '../utils/access.js';
 
 export async function submitMilestone(req, res, next) {
   try {
@@ -17,6 +19,9 @@ export async function submitMilestone(req, res, next) {
     if (!team) return res.status(403).json({ error: 'You must be in an active team' });
     if (String(team.teamLead) !== String(req.user._id))
       return res.status(403).json({ error: 'Only the team lead can submit' });
+
+    const existing = await MilestoneSubmission.findOne({ team: team._id, milestone: milestone._id });
+    if (existing) return res.status(409).json({ error: 'Milestone already submitted' });
 
     const files = (req.files || []).map(f => ({
       url: f.path,
@@ -50,9 +55,41 @@ export async function submitMilestone(req, res, next) {
 
 export async function getMilestoneSubmission(req, res, next) {
   try {
-    const submission = await MilestoneSubmission.findOne({ milestone: req.params.milestoneId })
+    const milestone = await Milestone.findById(req.params.milestoneId);
+    if (!milestone) return res.status(404).json({ error: 'Milestone not found' });
+
+    const project = await Project.findById(milestone.project);
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+
+    const course = await Course.findById(project.course);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    const query = { milestone: milestone._id };
+
+    if (req.user.role === 'faculty') {
+      if (!idsEqual(course.faculty, req.user._id))
+        return res.status(403).json({ error: 'Forbidden' });
+      if (req.query.teamId) query.team = req.query.teamId;
+    } else {
+      const ownTeam = await Team.findOne({ project: project._id, 'members.user': req.user._id });
+      if (!ownTeam) return res.status(403).json({ error: 'Forbidden' });
+      query.team = ownTeam._id;
+    }
+
+    const submission = await MilestoneSubmission.findOne(query)
       .populate('team', 'name')
-      .populate('submittedBy', 'name');
+      .populate('submittedBy', 'name')
+      .sort('-submittedAt');
+
+    if (!submission) return res.json({ submission: null });
+
+    if (req.user.role !== 'faculty') {
+      const sanitized = submission.toObject();
+      delete sanitized.aiFlagScore;
+      delete sanitized.aiFlagDetails;
+      return res.json({ submission: sanitized });
+    }
+
     res.json({ submission });
   } catch (err) { next(err); }
 }
@@ -61,7 +98,12 @@ export async function getProjectSubmissions(req, res, next) {
   try {
     const project = await Project.findById(req.params.projectId);
     if (!project) return res.status(404).json({ error: 'Project not found' });
-    const milestones = await (await import('../models/Milestone.js')).default.find({ project: project._id });
+    const course = await Course.findById(project.course);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+    if (!idsEqual(course.faculty, req.user._id))
+      return res.status(403).json({ error: 'Forbidden' });
+
+    const milestones = await Milestone.find({ project: project._id });
     const milestoneIds = milestones.map(m => m._id);
     const submissions = await MilestoneSubmission.find({ milestone: { $in: milestoneIds } })
       .populate('team', 'name')

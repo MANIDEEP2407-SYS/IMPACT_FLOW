@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+const defaultApiBaseUrl = import.meta.env.DEV
+  ? '/api'
+  : 'https://impact-flow.onrender.com/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: import.meta.env.VITE_API_URL || defaultApiBaseUrl,
   withCredentials: true,
 });
 

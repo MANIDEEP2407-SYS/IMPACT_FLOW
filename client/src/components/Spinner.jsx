@@ -5,9 +5,10 @@ export default function Spinner({ size = 'md' }) {
     <div
       className={`${dim} ${thick} animate-spin rounded-full`}
       style={{
-        borderColor: '#e0e7ff',
-        borderTopColor: '#4f46e5',
-        borderRightColor: '#0d9488',
+        borderColor: 'var(--border-glass)',
+        borderTopColor: 'var(--neon-500)',
+        borderRightColor: 'var(--cyber-500)',
+        filter: 'drop-shadow(0 0 6px rgba(99,102,241,0.2))',
       }}
     />
   );
