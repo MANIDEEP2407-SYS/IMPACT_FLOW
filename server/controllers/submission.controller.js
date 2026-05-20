@@ -6,6 +6,7 @@ import Course from '../models/Course.js';
 import { getAIFlagScore, getAIFlagDetails } from '../utils/aiFlag.js';
 import { notifyMany } from '../utils/notify.js';
 import { idsEqual } from '../utils/access.js';
+import { emitContributionEvent } from '../utils/eventEmitter.js';
 
 export async function submitMilestone(req, res, next) {
   try {
@@ -47,6 +48,21 @@ export async function submitMilestone(req, res, next) {
       userIds: team.members.map(m => m.user),
       type: 'submission',
       message: `Milestone "${milestone.title}" submitted successfully.`,
+    });
+
+    // Emit MILESTONE_SUBMITTED for team lead
+    await emitContributionEvent({
+      userId:    req.user._id,
+      projectId: milestone.project,
+      teamId:    team._id,
+      sourceType: 'MILESTONE',
+      eventType:  'MILESTONE_SUBMITTED',
+      referenceId: submission._id,
+      referenceModel: 'MilestoneSubmission',
+      metadata: {
+        description: `Submitted milestone: "${milestone.title}"`,
+        wordCount: notes.split(/\s+/).filter(Boolean).length,
+      },
     });
 
     res.status(201).json({ submission });

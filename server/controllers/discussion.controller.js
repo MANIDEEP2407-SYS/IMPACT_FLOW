@@ -1,7 +1,9 @@
 import { z } from 'zod';
 import Discussion from '../models/Discussion.js';
 import Team       from '../models/Team.js';
+import Project    from '../models/Project.js';
 import { idsEqual } from '../utils/access.js';
+import { emitContributionEvent } from '../utils/eventEmitter.js';
 
 const threadSchema = z.object({
   title:   z.string().min(1).max(200),
@@ -54,6 +56,24 @@ export async function createDiscussion(req, res, next) {
     const populated = await Discussion.findById(discussion._id)
       .populate('author', 'name email rollNo');
 
+    // Emit contribution event
+    const teamForEvent = await Team.findById(req.params.teamId);
+    if (teamForEvent) {
+      await emitContributionEvent({
+        userId:    req.user._id,
+        projectId: teamForEvent.project,
+        teamId:    teamForEvent._id,
+        sourceType: 'DISCUSSION',
+        eventType:  'DISCUSSION_POSTED',
+        referenceId: discussion._id,
+        referenceModel: 'Discussion',
+        metadata: {
+          description: `Started discussion: "${title.slice(0, 80)}"`,
+          wordCount: content.split(/\s+/).filter(Boolean).length,
+        },
+      });
+    }
+
     res.status(201).json({ discussion: populated });
   } catch (err) { next(err); }
 }
@@ -75,6 +95,24 @@ export async function addReply(req, res, next) {
     const populated = await Discussion.findById(discussion._id)
       .populate('author', 'name email rollNo')
       .populate('replies.author', 'name email rollNo');
+
+    // Emit contribution event for reply
+    const teamForReply = await Team.findById(discussion.team);
+    if (teamForReply) {
+      await emitContributionEvent({
+        userId:    req.user._id,
+        projectId: teamForReply.project,
+        teamId:    teamForReply._id,
+        sourceType: 'DISCUSSION',
+        eventType:  'DISCUSSION_REPLY',
+        referenceId: discussion._id,
+        referenceModel: 'Discussion',
+        metadata: {
+          description: `Replied to discussion`,
+          wordCount: content.split(/\s+/).filter(Boolean).length,
+        },
+      });
+    }
 
     res.json({ discussion: populated });
   } catch (err) { next(err); }

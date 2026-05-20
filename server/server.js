@@ -21,6 +21,9 @@ import notificationRoutes from './routes/notification.routes.js';
 import userRoutes from './routes/user.routes.js';
 import discussionRoutes from './routes/discussion.routes.js';
 import inviteRoutes from './routes/invite.routes.js';
+import contributionRoutes from './routes/contribution.routes.js';
+import githubRoutes from './routes/github.routes.js';
+import similarityRoutes from './routes/similarity.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { startCronJobs } from './utils/cronJobs.js';
 
@@ -102,6 +105,9 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api', userRoutes);
 app.use('/api', discussionRoutes);
 app.use('/api', inviteRoutes);
+app.use('/api', contributionRoutes);
+app.use('/api', githubRoutes);
+app.use('/api', similarityRoutes);
 
 app.use(errorHandler);
 

@@ -31,6 +31,9 @@ import LogTask from './pages/student/LogTask.jsx';
 import MyTasks from './pages/student/MyTasks.jsx';
 import SubmitMilestone from './pages/student/SubmitMilestone.jsx';
 import TeamWorkspace from './pages/shared/TeamWorkspace.jsx';
+import GitHubLink from './pages/student/GitHubLink.jsx';
+import ProjectREADMEEditor from './pages/student/ProjectREADMEEditor.jsx';
+import SimilarityReport from './pages/faculty/SimilarityReport.jsx';
 
 function RootRedirect() {
   const { user, loading } = useAuthStore();
@@ -58,6 +61,7 @@ function AppRoutes() {
       <Route path="/faculty/courses/:courseId/projects/new" element={<ProtectedRoute roles={['faculty']}><CreateProject /></ProtectedRoute>} />
       <Route path="/faculty/projects/:id" element={<ProtectedRoute roles={['faculty']}><ProjectDetail /></ProtectedRoute>} />
       <Route path="/faculty/teams/:teamId/tasks" element={<ProtectedRoute roles={['faculty']}><TeamTaskLog /></ProtectedRoute>} />
+      <Route path="/faculty/courses/:courseId/similarity" element={<ProtectedRoute roles={['faculty']}><SimilarityReport /></ProtectedRoute>} />
 
       {/* Student routes */}
       <Route path="/student/dashboard" element={<ProtectedRoute roles={['student']}><StudentDashboard /></ProtectedRoute>} />
@@ -71,6 +75,8 @@ function AppRoutes() {
       <Route path="/student/tasks" element={<ProtectedRoute roles={['student']}><MyTasks /></ProtectedRoute>} />
       <Route path="/student/tasks/new" element={<ProtectedRoute roles={['student']}><LogTask /></ProtectedRoute>} />
       <Route path="/student/milestones/:milestoneId/submit" element={<ProtectedRoute roles={['student']}><SubmitMilestone /></ProtectedRoute>} />
+      <Route path="/student/projects/:projectId/github" element={<ProtectedRoute roles={['student']}><GitHubLink /></ProtectedRoute>} />
+      <Route path="/student/projects/:projectId/readme" element={<ProtectedRoute roles={['student']}><ProjectREADMEEditor /></ProtectedRoute>} />
 
       {/* Shared workspace */}
       <Route path="/team/:teamId/workspace" element={<ProtectedRoute roles={['student','faculty']}><TeamWorkspace /></ProtectedRoute>} />

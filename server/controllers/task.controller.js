@@ -6,6 +6,7 @@ import Project from '../models/Project.js';
 import Course from '../models/Course.js';
 import { calcContributionScore } from '../utils/contribution.js';
 import { idsEqual } from '../utils/access.js';
+import { emitContributionEvent } from '../utils/eventEmitter.js';
 
 const taskSchema = z.object({
   title: z.string().min(2),
@@ -49,6 +50,49 @@ export async function createTask(req, res, next) {
     });
 
     await recalcContribution(team._id);
+
+    // Emit contribution events
+    const hasFiles = proofFiles.length > 0;
+    const isDoc = proofFiles.some(f =>
+      f.filename?.match(/\.(pdf|docx|doc|txt|md)$/i) ||
+      f.filename?.toLowerCase().includes('doc')
+    );
+
+    // TASK_CREATED event
+    await emitContributionEvent({
+      userId:    req.user._id,
+      projectId: milestone.project,
+      teamId:    team._id,
+      sourceType: 'TASK',
+      eventType:  'TASK_CREATED',
+      referenceId: task._id,
+      referenceModel: 'TaskLog',
+      metadata: {
+        description: data.description || data.title,
+        wordCount: (data.description || '').split(/\s+/).filter(Boolean).length,
+      },
+    });
+
+    // FILE events for uploads
+    if (hasFiles) {
+      for (const f of proofFiles) {
+        const eType = isDoc ? 'DOCUMENTATION_UPLOAD' : 'FILE_UPLOAD';
+        await emitContributionEvent({
+          userId:    req.user._id,
+          projectId: milestone.project,
+          teamId:    team._id,
+          sourceType: 'FILE',
+          eventType:  eType,
+          referenceId: task._id,
+          referenceModel: 'TaskLog',
+          metadata: {
+            description: `Uploaded ${f.filename}`,
+            fileHash: `${f.filename}-${req.user._id}`,
+          },
+        });
+      }
+    }
+
     res.status(201).json({ task });
   } catch (err) { next(err); }
 }
